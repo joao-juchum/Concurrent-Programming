@@ -9,6 +9,8 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include <time.h>
+
 int pb_debug = 0;
 
 
@@ -88,24 +90,44 @@ void add_millis_to_timespec(struct timespec *ts, long msec) {
   ts->tv_sec = ts->tv_sec + sec;
 }
 
-/* Delay until an absolute time. */
+// /* Delay until an absolute time. */
+// void delay_until(struct timespec *absolute_time) {
+//   struct timeval tv_now;
+//   struct timespec ts_now;
+//   struct timespec relative_time;
+
+//   gettimeofday(&tv_now, NULL);
+//   TIMEVAL_TO_TIMESPEC(&tv_now, &ts_now);
+//   relative_time.tv_nsec = absolute_time->tv_nsec - ts_now.tv_nsec;
+//   relative_time.tv_sec = absolute_time->tv_sec - ts_now.tv_sec;
+//   if (relative_time.tv_nsec < 0) {
+//     relative_time.tv_nsec = 1E9 + relative_time.tv_nsec;
+//     relative_time.tv_sec--;
+//   }
+//   if (relative_time.tv_sec < 0)
+//     return;
+
+//   nanosleep(&relative_time, NULL);
+// }
+
+/* 
+ In the previous implementation, we used gettimeofday() to compute
+ the relative time until the given absolute deadline, then called nanosleep().
+ However, there could be a delay between the moment we read the current time 
+ and when nanosleep() actually gets called (due to OS scheduling, context switch, etc).
+ This delay reduces the effective sleep time, making the thread miss the deadline.
+ 
+ In this version, we avoid calculating a relative time manually.
+ Instead, we use pthread_cond_timedwait() on a dummy condition variable,
+ which will sleep exactly until the specified absolute time,
+ regardless of when it starts.
+*/
 void delay_until(struct timespec *absolute_time) {
-  struct timeval tv_now;
-  struct timespec ts_now;
-  struct timespec relative_time;
+  pthread_mutex_lock(&resync_mutex);
+  pthread_cond_timedwait(&resync_condvar, &resync_mutex, absolute_time);
+  pthread_mutex_unlock(&resync_mutex);
+  // clock_nanosleep(CLOCK_MONOTONIC, TIMER_ABSTIME, absolute_time, NULL); -> This not worked well...
 
-  gettimeofday(&tv_now, NULL);
-  TIMEVAL_TO_TIMESPEC(&tv_now, &ts_now);
-  relative_time.tv_nsec = absolute_time->tv_nsec - ts_now.tv_nsec;
-  relative_time.tv_sec = absolute_time->tv_sec - ts_now.tv_sec;
-  if (relative_time.tv_nsec < 0) {
-    relative_time.tv_nsec = 1E9 + relative_time.tv_nsec;
-    relative_time.tv_sec--;
-  }
-  if (relative_time.tv_sec < 0)
-    return;
-
-  nanosleep(&relative_time, NULL);
 }
 
 // Compute time elapsed from start time

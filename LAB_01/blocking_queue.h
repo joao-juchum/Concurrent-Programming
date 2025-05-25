@@ -22,6 +22,10 @@ typedef struct {
   pthread_cond_t not_empty;
   // To wake producers
   pthread_cond_t not_full;
+
+  sem_t *empty_slots;
+  sem_t *full_slots;
+
 } blocking_queue_t;
 
 // Initialise the protected buffer structure above. sem_impl specifies
