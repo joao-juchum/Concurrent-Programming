@@ -9,6 +9,9 @@
 #include <stdlib.h>
 #include <string.h>
 
+int pb_debug = 0;
+
+
 pthread_key_t thread_info_key;
 
 // Start time as a timespec

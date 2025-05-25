@@ -16,6 +16,12 @@ extern int pb_debug;
 typedef struct {
   bool is_sem_impl;
   bounded_buffer_t *buffer;
+  // Guard access
+  pthread_mutex_t mutex;
+  // To wake consumers
+  pthread_cond_t not_empty;
+  // To wake producers
+  pthread_cond_t not_full;
 } blocking_queue_t;
 
 // Initialise the protected buffer structure above. sem_impl specifies

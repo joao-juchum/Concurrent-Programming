@@ -113,6 +113,9 @@ void *main_producer(void *arg) {
 void read_file(char *filename);
 
 int main(int argc, char *argv[]) {
+
+  pb_debug =1;
+
   int i;
   int *data;
 
@@ -120,8 +123,6 @@ int main(int argc, char *argv[]) {
     printf("Usage : %s <scenario file>\n", argv[0]);
     exit(1);
   }
-
-  pb_debug = 1;
   utils_init();
   read_file(argv[1]);
 
@@ -140,6 +141,7 @@ int main(int argc, char *argv[]) {
   for (i = 0; i < n_consumers; i++) {
     int *arg = malloc(sizeof(int));
     *arg = i;
+    //printf("Consumers arg: %p \n", arg);
     pthread_create(&tasks[i], NULL, main_consumer, arg);
   }
 
@@ -147,7 +149,8 @@ int main(int argc, char *argv[]) {
   for (i = n_consumers; i < n_producers + n_consumers; i++) {
     int *arg = malloc(sizeof(int));
     *arg = i;
-    pthread_create(&tasks[i + n_consumers], NULL, main_producer, arg);
+    //printf("Producers arg: %p \n", arg);
+    pthread_create(&tasks[i], NULL, main_producer, arg);
   }
 
   // Wait for producers and consumers termination

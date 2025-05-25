@@ -3,7 +3,7 @@
 #include "sem_blocking_queue.h"
 
 bool is_sem_impl; // Use the semaphore implementation or not
-int pb_debug = 0;
+extern int pb_debug;
 
 // Initialise the blocking queue structure above. is_sem_impl specifies
 // whether the implementation is a semaphore based implementation.
