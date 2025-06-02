@@ -1,0 +1,12 @@
+-M
+bounded_buffer.h
+bounded_buffer.c
+main_blocking_queue.c
+blocking_queue.c
+blocking_queue.h
+cond_blocking_queue.c
+cond_blocking_queue.h
+sem_blocking_queue.c
+sem_blocking_queue.h
+utils.c
+utils.h
